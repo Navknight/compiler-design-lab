@@ -1,0 +1,10 @@
+CFLAGS = -g
+LDLIBS = -ll
+CC = gcc
+
+lexer: lex.yy.o
+	$(CC) $(CFLAGS) lex.yy.o -o myexec $(LDLIBS)
+lex.yy.o: lex.yy.c
+	$(CC) $(CFLAGS) -c lex.yy.c -o lex.yy.o
+lex.yy.c: $(file)
+	flex $(file)

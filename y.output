@@ -1,0 +1,934 @@
+   0  $accept : slist $end
+
+   1  $$1 :
+
+   2  slist : assignment SEMI $$1 slist
+
+   3  $$2 :
+
+   4  $$3 :
+
+   5  $$4 :
+
+   6  $$5 :
+
+   7  $$6 :
+
+   8  $$7 :
+
+   9  slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist
+  10        |
+  11        | error
+
+  12  assignment : var ASSIGN additive
+  13             | var INC
+  14             | var DEC
+  15             | INC var
+  16             | DEC var
+
+  17  var : ID
+  18      | LPAREN var RPAREN
+
+  19  boolean : primary
+  20          | primary LT primary
+  21          | primary GT primary
+  22          | primary LTEQ primary
+  23          | primary GTEQ primary
+  24          | primary EQ primary
+  25          | primary NEQ primary
+  26          | NOT primary
+
+  27  additive : multiplicative
+  28           | additive PLUS multiplicative
+  29           | additive MINUS multiplicative
+
+  30  multiplicative : unary
+  31                 | multiplicative MUL unary
+  32                 | multiplicative DIV unary
+
+  33  unary : postfix
+  34        | INC unary
+  35        | DEC unary
+  36        | PLUS unary
+  37        | MINUS unary
+
+  38  postfix : primary
+  39          | postfix INC
+  40          | postfix DEC
+
+  41  primary : constant
+  42          | ID
+  43          | LPAREN additive RPAREN
+
+  44  constant : INT
+
+state 0
+	$accept : . slist $end  (0)
+	slist : .  (10)
+
+	error  shift 1
+	LPAREN  shift 2
+	INC  shift 3
+	DEC  shift 4
+	FOR  shift 5
+	ID  shift 6
+	$end  reduce 10
+
+	slist  goto 7
+	assignment  goto 8
+	var  goto 9
+
+
+state 1
+	slist : error .  (11)
+
+	.  reduce 11
+
+
+state 2
+	var : LPAREN . var RPAREN  (18)
+
+	LPAREN  shift 2
+	ID  shift 6
+	.  error
+
+	var  goto 10
+
+
+state 3
+	assignment : INC . var  (15)
+
+	LPAREN  shift 2
+	ID  shift 6
+	.  error
+
+	var  goto 11
+
+
+state 4
+	assignment : DEC . var  (16)
+
+	LPAREN  shift 2
+	ID  shift 6
+	.  error
+
+	var  goto 12
+
+
+state 5
+	slist : FOR . LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+
+	LPAREN  shift 13
+	.  error
+
+
+state 6
+	var : ID .  (17)
+
+	.  reduce 17
+
+
+state 7
+	$accept : slist . $end  (0)
+
+	$end  accept
+
+
+state 8
+	slist : assignment . SEMI $$1 slist  (2)
+
+	SEMI  shift 14
+	.  error
+
+
+state 9
+	assignment : var . ASSIGN additive  (12)
+	assignment : var . INC  (13)
+	assignment : var . DEC  (14)
+
+	ASSIGN  shift 15
+	INC  shift 16
+	DEC  shift 17
+	.  error
+
+
+state 10
+	var : LPAREN var . RPAREN  (18)
+
+	RPAREN  shift 18
+	.  error
+
+
+state 11
+	assignment : INC var .  (15)
+
+	.  reduce 15
+
+
+state 12
+	assignment : DEC var .  (16)
+
+	.  reduce 16
+
+
+state 13
+	slist : FOR LPAREN . assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+
+	LPAREN  shift 2
+	INC  shift 3
+	DEC  shift 4
+	ID  shift 6
+	.  error
+
+	assignment  goto 19
+	var  goto 9
+
+
+state 14
+	slist : assignment SEMI . $$1 slist  (2)
+	$$1 : .  (1)
+
+	.  reduce 1
+
+	$$1  goto 20
+
+
+state 15
+	assignment : var ASSIGN . additive  (12)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	additive  goto 28
+	multiplicative  goto 29
+	unary  goto 30
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 16
+	assignment : var INC .  (13)
+
+	.  reduce 13
+
+
+state 17
+	assignment : var DEC .  (14)
+
+	.  reduce 14
+
+
+state 18
+	var : LPAREN var RPAREN .  (18)
+
+	.  reduce 18
+
+
+state 19
+	slist : FOR LPAREN assignment . $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+	$$2 : .  (3)
+
+	.  reduce 3
+
+	$$2  goto 34
+
+
+state 20
+	slist : assignment SEMI $$1 . slist  (2)
+	slist : .  (10)
+
+	error  shift 1
+	LPAREN  shift 2
+	INC  shift 3
+	DEC  shift 4
+	FOR  shift 5
+	ID  shift 6
+	$end  reduce 10
+	RBRACE  reduce 10
+
+	slist  goto 35
+	assignment  goto 8
+	var  goto 9
+
+
+state 21
+	unary : PLUS . unary  (36)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	unary  goto 36
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 22
+	unary : MINUS . unary  (37)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	unary  goto 37
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 23
+	primary : LPAREN . additive RPAREN  (43)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	additive  goto 38
+	multiplicative  goto 29
+	unary  goto 30
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 24
+	unary : INC . unary  (34)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	unary  goto 39
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 25
+	unary : DEC . unary  (35)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	unary  goto 40
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 26
+	constant : INT .  (44)
+
+	.  reduce 44
+
+
+state 27
+	primary : ID .  (42)
+
+	.  reduce 42
+
+
+state 28
+	assignment : var ASSIGN additive .  (12)
+	additive : additive . PLUS multiplicative  (28)
+	additive : additive . MINUS multiplicative  (29)
+
+	PLUS  shift 41
+	MINUS  shift 42
+	RPAREN  reduce 12
+	SEMI  reduce 12
+
+
+state 29
+	additive : multiplicative .  (27)
+	multiplicative : multiplicative . MUL unary  (31)
+	multiplicative : multiplicative . DIV unary  (32)
+
+	DIV  shift 43
+	MUL  shift 44
+	PLUS  reduce 27
+	MINUS  reduce 27
+	RPAREN  reduce 27
+	SEMI  reduce 27
+
+
+state 30
+	multiplicative : unary .  (30)
+
+	.  reduce 30
+
+
+state 31
+	unary : postfix .  (33)
+	postfix : postfix . INC  (39)
+	postfix : postfix . DEC  (40)
+
+	INC  shift 45
+	DEC  shift 46
+	PLUS  reduce 33
+	MINUS  reduce 33
+	DIV  reduce 33
+	MUL  reduce 33
+	RPAREN  reduce 33
+	SEMI  reduce 33
+
+
+state 32
+	postfix : primary .  (38)
+
+	.  reduce 38
+
+
+state 33
+	primary : constant .  (41)
+
+	.  reduce 41
+
+
+state 34
+	slist : FOR LPAREN assignment $$2 . SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+
+	SEMI  shift 47
+	.  error
+
+
+state 35
+	slist : assignment SEMI $$1 slist .  (2)
+
+	.  reduce 2
+
+
+state 36
+	unary : PLUS unary .  (36)
+
+	.  reduce 36
+
+
+state 37
+	unary : MINUS unary .  (37)
+
+	.  reduce 37
+
+
+state 38
+	additive : additive . PLUS multiplicative  (28)
+	additive : additive . MINUS multiplicative  (29)
+	primary : LPAREN additive . RPAREN  (43)
+
+	PLUS  shift 41
+	MINUS  shift 42
+	RPAREN  shift 48
+	.  error
+
+
+state 39
+	unary : INC unary .  (34)
+
+	.  reduce 34
+
+
+state 40
+	unary : DEC unary .  (35)
+
+	.  reduce 35
+
+
+state 41
+	additive : additive PLUS . multiplicative  (28)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	multiplicative  goto 49
+	unary  goto 30
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 42
+	additive : additive MINUS . multiplicative  (29)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	multiplicative  goto 50
+	unary  goto 30
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 43
+	multiplicative : multiplicative DIV . unary  (32)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	unary  goto 51
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 44
+	multiplicative : multiplicative MUL . unary  (31)
+
+	PLUS  shift 21
+	MINUS  shift 22
+	LPAREN  shift 23
+	INC  shift 24
+	DEC  shift 25
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	unary  goto 52
+	postfix  goto 31
+	primary  goto 32
+	constant  goto 33
+
+
+state 45
+	postfix : postfix INC .  (39)
+
+	.  reduce 39
+
+
+state 46
+	postfix : postfix DEC .  (40)
+
+	.  reduce 40
+
+
+state 47
+	slist : FOR LPAREN assignment $$2 SEMI . boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+
+	LPAREN  shift 23
+	NOT  shift 53
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	boolean  goto 54
+	primary  goto 55
+	constant  goto 33
+
+
+state 48
+	primary : LPAREN additive RPAREN .  (43)
+
+	.  reduce 43
+
+
+state 49
+	additive : additive PLUS multiplicative .  (28)
+	multiplicative : multiplicative . MUL unary  (31)
+	multiplicative : multiplicative . DIV unary  (32)
+
+	DIV  shift 43
+	MUL  shift 44
+	PLUS  reduce 28
+	MINUS  reduce 28
+	RPAREN  reduce 28
+	SEMI  reduce 28
+
+
+state 50
+	additive : additive MINUS multiplicative .  (29)
+	multiplicative : multiplicative . MUL unary  (31)
+	multiplicative : multiplicative . DIV unary  (32)
+
+	DIV  shift 43
+	MUL  shift 44
+	PLUS  reduce 29
+	MINUS  reduce 29
+	RPAREN  reduce 29
+	SEMI  reduce 29
+
+
+state 51
+	multiplicative : multiplicative DIV unary .  (32)
+
+	.  reduce 32
+
+
+state 52
+	multiplicative : multiplicative MUL unary .  (31)
+
+	.  reduce 31
+
+
+state 53
+	boolean : NOT . primary  (26)
+
+	LPAREN  shift 23
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	primary  goto 56
+	constant  goto 33
+
+
+state 54
+	slist : FOR LPAREN assignment $$2 SEMI boolean . $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+	$$3 : .  (4)
+
+	.  reduce 4
+
+	$$3  goto 57
+
+
+state 55
+	boolean : primary .  (19)
+	boolean : primary . LT primary  (20)
+	boolean : primary . GT primary  (21)
+	boolean : primary . LTEQ primary  (22)
+	boolean : primary . GTEQ primary  (23)
+	boolean : primary . EQ primary  (24)
+	boolean : primary . NEQ primary  (25)
+
+	GT  shift 58
+	LT  shift 59
+	GTEQ  shift 60
+	LTEQ  shift 61
+	EQ  shift 62
+	NEQ  shift 63
+	SEMI  reduce 19
+
+
+state 56
+	boolean : NOT primary .  (26)
+
+	.  reduce 26
+
+
+state 57
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 . SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+
+	SEMI  shift 64
+	.  error
+
+
+state 58
+	boolean : primary GT . primary  (21)
+
+	LPAREN  shift 23
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	primary  goto 65
+	constant  goto 33
+
+
+state 59
+	boolean : primary LT . primary  (20)
+
+	LPAREN  shift 23
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	primary  goto 66
+	constant  goto 33
+
+
+state 60
+	boolean : primary GTEQ . primary  (23)
+
+	LPAREN  shift 23
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	primary  goto 67
+	constant  goto 33
+
+
+state 61
+	boolean : primary LTEQ . primary  (22)
+
+	LPAREN  shift 23
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	primary  goto 68
+	constant  goto 33
+
+
+state 62
+	boolean : primary EQ . primary  (24)
+
+	LPAREN  shift 23
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	primary  goto 69
+	constant  goto 33
+
+
+state 63
+	boolean : primary NEQ . primary  (25)
+
+	LPAREN  shift 23
+	INT  shift 26
+	ID  shift 27
+	.  error
+
+	primary  goto 70
+	constant  goto 33
+
+
+state 64
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI . $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+	$$4 : .  (5)
+
+	.  reduce 5
+
+	$$4  goto 71
+
+
+state 65
+	boolean : primary GT primary .  (21)
+
+	.  reduce 21
+
+
+state 66
+	boolean : primary LT primary .  (20)
+
+	.  reduce 20
+
+
+state 67
+	boolean : primary GTEQ primary .  (23)
+
+	.  reduce 23
+
+
+state 68
+	boolean : primary LTEQ primary .  (22)
+
+	.  reduce 22
+
+
+state 69
+	boolean : primary EQ primary .  (24)
+
+	.  reduce 24
+
+
+state 70
+	boolean : primary NEQ primary .  (25)
+
+	.  reduce 25
+
+
+state 71
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 . assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+
+	LPAREN  shift 2
+	INC  shift 3
+	DEC  shift 4
+	ID  shift 6
+	.  error
+
+	assignment  goto 72
+	var  goto 9
+
+
+state 72
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment . $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+	$$5 : .  (6)
+
+	.  reduce 6
+
+	$$5  goto 73
+
+
+state 73
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 . RPAREN LBRACE $$6 slist $$7 RBRACE slist  (9)
+
+	RPAREN  shift 74
+	.  error
+
+
+state 74
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN . LBRACE $$6 slist $$7 RBRACE slist  (9)
+
+	LBRACE  shift 75
+	.  error
+
+
+state 75
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE . $$6 slist $$7 RBRACE slist  (9)
+	$$6 : .  (7)
+
+	.  reduce 7
+
+	$$6  goto 76
+
+
+state 76
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 . slist $$7 RBRACE slist  (9)
+	slist : .  (10)
+
+	error  shift 1
+	LPAREN  shift 2
+	INC  shift 3
+	DEC  shift 4
+	FOR  shift 5
+	ID  shift 6
+	RBRACE  reduce 10
+
+	slist  goto 77
+	assignment  goto 8
+	var  goto 9
+
+
+state 77
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist . $$7 RBRACE slist  (9)
+	$$7 : .  (8)
+
+	.  reduce 8
+
+	$$7  goto 78
+
+
+state 78
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 . RBRACE slist  (9)
+
+	RBRACE  shift 79
+	.  error
+
+
+state 79
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE . slist  (9)
+	slist : .  (10)
+
+	error  shift 1
+	LPAREN  shift 2
+	INC  shift 3
+	DEC  shift 4
+	FOR  shift 5
+	ID  shift 6
+	$end  reduce 10
+	RBRACE  reduce 10
+
+	slist  goto 80
+	assignment  goto 8
+	var  goto 9
+
+
+state 80
+	slist : FOR LPAREN assignment $$2 SEMI boolean $$3 SEMI $$4 assignment $$5 RPAREN LBRACE $$6 slist $$7 RBRACE slist .  (9)
+
+	.  reduce 9
+
+
+27 terminals, 18 nonterminals
+45 grammar rules, 81 states
+
+grammar parser grammar
+symbol# value# symbol
+     0      0  $end
+     1    256  error
+     2    257  PLUS
+     3    258  MINUS
+     4    259  DIV
+     5    260  MUL
+     6    261  RPAREN
+     7    262  LPAREN
+     8    263  LSQ
+     9    264  RSQ
+    10    265  LBRACE
+    11    266  RBRACE
+    12    267  SEMI
+    13    268  COMMA
+    14    269  ASSIGN
+    15    270  GT
+    16    271  LT
+    17    272  GTEQ
+    18    273  LTEQ
+    19    274  INC
+    20    275  DEC
+    21    276  FOR
+    22    277  EQ
+    23    278  NEQ
+    24    279  NOT
+    25    280  INT
+    26    281  ID
+    27    282  $accept
+    28    283  slist
+    29    284  assignment
+    30    285  var
+    31    286  boolean
+    32    287  additive
+    33    288  multiplicative
+    34    289  unary
+    35    290  postfix
+    36    291  primary
+    37    292  constant
+    38    293  $$1
+    39    294  $$2
+    40    295  $$3
+    41    296  $$4
+    42    297  $$5
+    43    298  $$6
+    44    299  $$7
