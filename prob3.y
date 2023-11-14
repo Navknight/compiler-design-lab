@@ -52,7 +52,7 @@ slist:		assignment SEMI {
 		strcpy($$->token, "KEYWORD");
 		strcpy($$->lexeme, "FOR");
 		strcpy($$->next_label, label_g);
-		printf("%s:", $$->next_label);
+		printf("\n%s:\n", $$->next_label);
 	} SEMI boolean {
 		$$ = malloc(sizeof(struct I_NODE));
 		if($$ == NULL)
@@ -70,22 +70,22 @@ slist:		assignment SEMI {
 		strcpy($6->next_label, label_g);
 		printf("if %s goto %s\n", $6->temp, $$->true_label);
 		printf("goto %s\n", $$->false_label);
-		printf("\n%s:", $$->true_label);
+		printf("\n%s:\n", $$->true_label);
 	} SEMI {
 		$$ = malloc(sizeof(struct I_NODE));
 		if($$ == NULL)
 			yyerror("no mem");
 		getLabel();
 		strcpy($$->next_label, label_g);
-		printf("%s: ", $$->next_label);
+		printf("\n%s:\n", $$->next_label);
 	} assignment {
 		$$ = malloc(sizeof(struct I_NODE));
 		if($$ == NULL)
 			yyerror("no mem");
 		strcpy($$->next_label, $4->next_label);
-		printf("%s:", $$->next_label);
+		printf("\n%s:\n", $$->next_label);
 	} RPAREN LBRACE { printf("%s:", $7->true_label); } slist {
-		printf("goto %s", $9->next_label);
+		printf("goto %s\n", $9->next_label);
 	} RBRACE slist
 	|
 	| 	error {yyerror("error");};

@@ -29,7 +29,7 @@
 "--"					{ return DEC; }
 "!"                     { return NOT; }
 "for"					{ return FOR; }
-[a-zA-Z]+[0-9a-zA-Z]*			{ yylval.lexeme = strdup(yytext); return ID; }
+[a-zA-Z]+[0-9a-zA-Z_]*			{ yylval.lexeme = strdup(yytext); return ID; }
 [0-9]+					{ yylval.intValue = atoi(yytext); return INT; }
 
 [ \t\n]					{}
