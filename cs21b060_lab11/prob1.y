@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 int yylex();
 int yyerror(char *);
 int eflag=0;
@@ -19,8 +20,83 @@ typedef struct {
 switchElement switchStack[100];
 int switchStackTop = -1;
 
+typedef struct symbol {
+	enum { 
+			INT_TYPE, 
+			FLOAT_TYPE, 
+			CHAR_TYPE 
+		} type;
+		// Dont mess with the ordering of the enum
+	bool is_array;
+    char name[20];
+    int size;
+    int offset;
+    struct symbol *next;
+} symbol;
+
+symbol *symtab = NULL;
+
+symbol *store_symbol(char name[], int size, int type, bool is_array) {
+    symbol *sym = malloc(sizeof(symbol));
+	strcpy(sym->name, name);
+	sym->type = type;
+	sym->is_array = is_array;
+    // sym->name = strdup(name);
+    sym->size = size;
+    sym->offset = symtab ? symtab->offset + symtab->size : 0;
+    sym->next = symtab;
+    symtab = sym;
+    return sym;
+}
+
+symbol *lead_symbol(char *name) {
+    for (symbol *sym = symtab; sym; sym = sym->next) {
+        if (strcmp(sym->name, name) == 0) {
+            return sym;
+        }
+    }
+    return NULL;
+}
+
+symbol *get_scoped_symbol(char *name) {
+	for (symbol *sym = symtab; sym && sym->size != 0; sym = sym->next) {
+		if (strcmp(sym->name, name) == 0) {
+			return sym;
+		}
+	}
+	return NULL;
+}
+
+void create_scope() {
+    store_symbol("", 0, 0, false);
+}
+
+void remove_scope() {
+    symbol *sym = symtab;
+	printf("\n\nPrevious Function Scope->-----------------\n");
+    printf("//\tLexeme\tSize\tOffset\tType\t//\n");
+    while (sym && sym->size != 0) {
+		if(sym->is_array)
+			printf("//\t%s\t%d\t%#06x\t%s\t//\n", sym->name, sym->size, sym->offset, sym->type == INT_TYPE ? "int-Arr" : sym->type == FLOAT_TYPE ? "fl-Arr" : "ch-Arr");
+		else
+			printf("//\t%s\t%d\t%#06x\t%s\t//\n", sym->name, sym->size, sym->offset, sym->type == INT_TYPE ? "int" : sym->type == FLOAT_TYPE ? "float" : "char");
+        symbol *next = sym->next;
+        // free(sym->name);
+        free(sym);
+        sym = next;
+    }
+	printf("------------------------------------------\n");
+    symtab = sym ? sym->next : NULL;
+    if (sym) {
+        free(sym);
+    }
+}
+
 typedef struct ASTNode {
     enum { 
+		NODETYPE_INT_TYPE,
+		NODETYPE_FLOAT_TYPE,
+		NODETYPE_CHAR_TYPE,
         NODETYPE_CONSTANT_INT, 
         NODETYPE_IDENTIFIER, 
         NODETYPE_OPERATOR,
@@ -28,6 +104,8 @@ typedef struct ASTNode {
 		NODETYPE_SWITCH,
         NODETYPE_WHILE
     } token;
+
+	// Dont mess with the ordering of the enum
 
     int intValue;
     char lexeme[20];
@@ -61,23 +139,87 @@ typedef struct ASTNode {
 	struct ASTNode *node;
 }
 
-%token ADD SUB MUL DIV INC DEC ASSIGN LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON COLON COMMA IF ELSE WHILE SWITCH CASE BREAK CONTINUE RETURN GOTO DEFAULT LT GT LEQ GEQ EQ NEQ AND OR NOT
+%token ADD SUB MUL DIV INC DEC ASSIGN LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON COLON COMMA IF ELSE WHILE SWITCH CASE BREAK CONTINUE RETURN GOTO DEFAULT INT_TYPE FLOAT_TYPE CHAR_TYPE LT GT LEQ GEQ EQ NEQ AND OR NOT
 %token <intValue> INTEGER
 %token <lexeme> IDENTIFIER
-%type <node> slist expression assignmentExpression conditionalExpression logicalOrExpression logicalAndExpression equalityExpression relationalExpression additiveExpression multiplicativeExpression unaryExpression postfixExpression primaryExpression selectionStatement elseSelection labeledStatement iterationStatement
+%type <node> slist typeSpec expression assignment conditional logicalOr logicalAnd equality relop additive multiplicative unary postfix primary selectionStmt elseStmt labeledStmt iterationStmt
+%type <intValue> arrayDeclarator
 
 %%
 
-program : slist {printf("\n\nCompleted\n");};
+program : {create_scope();} slist {remove_scope(); printf("\n\nCompleted\n");};
 
-slist : slist assignmentExpression SEMICOLON
-		| slist selectionStatement
-		| slist iterationStatement
-		| slist error {printf("\nRejected");}
+slist : assignment SEMICOLON slist
+		| varDeclare SEMICOLON slist
+		| selectionStmt slist
+		| iterationStmt slist
+		| error {printf("\nRejected");} slist
 		| {printf("\n");};
 
-expression : assignmentExpression { $$ = $1;}
-			| expression COMMA assignmentExpression {
+varDeclare : typeSpec idList;
+
+idList : IDENTIFIER {
+					if(get_scoped_symbol($1) != NULL){
+						printf("\nError : Variable %s already inside symbol table, exiting program\n", $1);
+						exit(0);
+					}
+					store_symbol($1, $<node>0->intValue, $<node>0->token, false);
+					printf("\nNew variable %s", $1);
+				}
+				| idList COMMA IDENTIFIER {
+					if(get_scoped_symbol($3) != NULL){
+						printf("\nError : Variable %s already inside symbol table, exiting program\n", $3);
+						exit(0);
+					}
+					store_symbol($3, $<node>0->intValue, $<node>0->token, false);
+					printf("\nNew variable %s", $3);
+				}
+				| idList COMMA IDENTIFIER arrayDeclarator {
+					if(get_scoped_symbol($3) != NULL){
+						printf("\nError : Variable %s already inside symbol table, exiting program\n", $3);
+						exit(0);
+					}
+					store_symbol($3, $<node>0->intValue * $4, $<node>0->token, true);
+					printf("\nNew variable %s", $3);
+				};
+
+arrayDeclarator : arrayDeclarator LBRACKET INTEGER RBRACKET {
+					$$ = $1 * $3;
+				}
+				| LBRACKET INTEGER RBRACKET {
+					$$ = $2;
+				};
+
+typeSpec :	INT_TYPE {
+					$$ = malloc(sizeof(struct ASTNode));
+					if($$ == NULL){
+						printf("Out of memory\n");
+						exit(0);
+					}
+					$$->intValue = 4;
+					$$->token = NODETYPE_INT_TYPE;
+				}
+				| FLOAT_TYPE {
+					$$ = malloc(sizeof(struct ASTNode));
+					if($$ == NULL){
+						printf("Out of memory\n");
+						exit(0);
+					}
+					$$->intValue = 4;
+					$$->token = NODETYPE_FLOAT_TYPE;
+				}
+				| CHAR_TYPE {
+					$$ = malloc(sizeof(struct ASTNode));
+					if($$ == NULL){
+						printf("Out of memory\n");
+						exit(0);
+					}
+					$$->intValue = 1;
+					$$->token = NODETYPE_CHAR_TYPE;
+				};
+
+expression : assignment { $$ = $1;}
+			| expression COMMA assignment {
 				$$ = malloc(sizeof(struct ASTNode));
 				if($$ == NULL){
 					printf("Out of memory\n");
@@ -89,8 +231,8 @@ expression : assignmentExpression { $$ = $1;}
 				strcpy($$->info.opInfo.op, ",");
 			};
 
-assignmentExpression :	conditionalExpression { $$ = $1; }
-						| unaryExpression ASSIGN assignmentExpression {
+assignment :	conditional { $$ = $1; }
+						| unary ASSIGN assignment {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -104,12 +246,12 @@ assignmentExpression :	conditionalExpression { $$ = $1; }
 							printf("\n%s = %s", $1->lexeme, $3->temp_var);
 						};
 
-conditionalExpression : logicalOrExpression { $$ = $1; };
+conditional : logicalOr { $$ = $1; };
 
-logicalOrExpression :	logicalAndExpression {
+logicalOr :	logicalAnd {
 							$$ = $1;
 						}
-						| logicalOrExpression OR logicalAndExpression {
+						| logicalOr OR logicalAnd {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -125,10 +267,10 @@ logicalOrExpression :	logicalAndExpression {
 							printf("\n%s = %s || %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 						};
 
-logicalAndExpression :	equalityExpression {
+logicalAnd :	equality {
 							$$ = $1;
 						}
-						| logicalAndExpression AND equalityExpression {
+						| logicalAnd AND equality {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -144,10 +286,10 @@ logicalAndExpression :	equalityExpression {
 							printf("\n%s = %s && %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 						};
 
-equalityExpression :	relationalExpression {
+equality :	relop {
 							$$ = $1;
 						}
-						| equalityExpression EQ relationalExpression {
+						| equality EQ relop {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -162,7 +304,7 @@ equalityExpression :	relationalExpression {
 							$$->intValue = $1->intValue == $3->intValue;
 							printf("\n%s = %s == %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 						}
-						| equalityExpression NEQ relationalExpression {
+						| equality NEQ relop {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -178,10 +320,10 @@ equalityExpression :	relationalExpression {
 							printf("\n%s = %s != %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 						};
 
-relationalExpression :	additiveExpression {
+relop :	additive {
 							$$ = $1;
 						}
-						| relationalExpression LT additiveExpression {
+						| relop LT additive {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -196,7 +338,7 @@ relationalExpression :	additiveExpression {
 							$$->intValue = $1->intValue < $3->intValue;
 							printf("\n%s = %s < %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 						}
-						| relationalExpression GT additiveExpression {
+						| relop GT additive {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -211,7 +353,7 @@ relationalExpression :	additiveExpression {
 							$$->intValue = $1->intValue > $3->intValue;
 							printf("\n%s = %s > %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 						}
-						| relationalExpression LEQ additiveExpression {
+						| relop LEQ additive {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -226,7 +368,7 @@ relationalExpression :	additiveExpression {
 							$$->intValue = $1->intValue <= $3->intValue;
 							printf("\n%s = %s <= %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 						}
-						| relationalExpression GEQ additiveExpression {
+						| relop GEQ additive {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -242,10 +384,10 @@ relationalExpression :	additiveExpression {
 							printf("\n%s = %s >= %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 						};
 
-additiveExpression : multiplicativeExpression {
+additive : multiplicative {
 						$$ = $1;
 					}
-					| additiveExpression ADD multiplicativeExpression {
+					| additive ADD multiplicative {
 						$$ = malloc(sizeof(struct ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -261,7 +403,7 @@ additiveExpression : multiplicativeExpression {
 						$$->intValue = $1->intValue + $3->intValue;
 						printf("\n%s = %s + %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 					}
-					| additiveExpression SUB multiplicativeExpression {
+					| additive SUB multiplicative {
 						$$ = malloc(sizeof(struct ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -277,10 +419,10 @@ additiveExpression : multiplicativeExpression {
 						printf("\n%s = %s - %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 					};
 
-multiplicativeExpression :	unaryExpression {
+multiplicative :	unary {
 								$$ = $1;
 							}
-							| multiplicativeExpression MUL unaryExpression {
+							| multiplicative MUL unary {
 								$$ = malloc(sizeof(struct ASTNode));
 								if($$ == NULL){
 									printf("Out of memory\n");
@@ -295,7 +437,7 @@ multiplicativeExpression :	unaryExpression {
 								$$->intValue = $1->intValue * $3->intValue;
 								printf("\n%s = %s * %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 							}
-							| multiplicativeExpression DIV unaryExpression {
+							| multiplicative DIV unary {
 								$$ = malloc(sizeof(struct ASTNode));
 								if($$ == NULL){
 									printf("Out of memory\n");
@@ -311,10 +453,10 @@ multiplicativeExpression :	unaryExpression {
 								printf("\n%s = %s / %s", $$->temp_var, $$->info.opInfo.left->temp_var, $$->info.opInfo.right->temp_var);
 							};
 
-unaryExpression :	postfixExpression {
+unary :	postfix {
 						$$ = $1;
 					}
-					| INC unaryExpression {
+					| INC unary {
 						$$ = malloc(sizeof(struct ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -331,7 +473,7 @@ unaryExpression :	postfixExpression {
 						$$->intValue = $2->intValue;
 						printf("\n%s = %s", $$->temp_var, $$->info.opInfo.right->temp_var);
 					}
-					| DEC unaryExpression {
+					| DEC unary {
 						$$ = malloc(sizeof(struct ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -348,10 +490,10 @@ unaryExpression :	postfixExpression {
 						$$->intValue = $2->intValue;
 						printf("\n%s = %s", $$->temp_var, $$->info.opInfo.right->temp_var);
 					}
-					| ADD unaryExpression {
+					| ADD unary {
 						$$ = $2;
 					}
-					| SUB unaryExpression {
+					| SUB unary {
 						$$ = malloc(sizeof(struct ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -366,7 +508,7 @@ unaryExpression :	postfixExpression {
 						$$->intValue = -1 * $2->intValue;
 						printf("\n%s = -1 * %s", $$->temp_var, $$->info.opInfo.right->temp_var);
 					}
-					| NOT unaryExpression {
+					| NOT unary {
 						$$ = malloc(sizeof(struct ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -382,10 +524,10 @@ unaryExpression :	postfixExpression {
 						printf("\n%s = !%s", $$->temp_var, $$->info.opInfo.right->temp_var);
 					};
 
-postfixExpression : primaryExpression {
+postfix : primary {
 						$$ = $1;
 					}
-					| postfixExpression INC {
+					| postfix INC {
 						$$ = malloc(sizeof(struct ASTNode));
 						if ($$ == NULL) {
 							yyerror("no mem");
@@ -401,7 +543,7 @@ postfixExpression : primaryExpression {
 						$1->intValue = $1->intValue + 1;
 						printf("\n%s = %s + 1", $1->temp_var, $1->temp_var);
 					}
-					| postfixExpression DEC {
+					| postfix DEC {
 						$$ = malloc(sizeof(struct ASTNode));
 						if ($$ == NULL) {
 							yyerror("no mem");
@@ -418,7 +560,7 @@ postfixExpression : primaryExpression {
 						printf("\n%s = %s - 1", $1->temp_var, $1->temp_var);
 					};
 
-primaryExpression : INTEGER {
+primary : INTEGER {
 						$$ = malloc(sizeof(ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -431,6 +573,10 @@ primaryExpression : INTEGER {
 						printf("\n%s = %d", $$->temp_var, $$->intValue);
 					} 
 					| IDENTIFIER {
+						if(lead_symbol($1) == NULL){
+							printf("\nError : Variable %s not in symbol table, exiting program\n", $1);
+							exit(0);
+						}
 						$$ = malloc(sizeof(ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -446,7 +592,8 @@ primaryExpression : INTEGER {
 						$$ = $2;
 					};
 
-selectionStatement :	IF LPAREN assignmentExpression RPAREN LBRACE {
+selectionStmt :	IF LPAREN assignment RPAREN LBRACE {
+							create_scope();
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -468,7 +615,8 @@ selectionStatement :	IF LPAREN assignmentExpression RPAREN LBRACE {
 							$$->info.flowControlInfo.trueBranch = $7;
 							printf("\ngoto %s", $$->info.flowControlInfo.next_label);
 							printf("\n\n%s:", $$->info.flowControlInfo.false_label);
-						} RBRACE elseSelection {
+							remove_scope();
+						} RBRACE elseStmt {
 							$$ = $8;
 							ASTNode *temp = $10;
 							if(temp != NULL){
@@ -493,13 +641,14 @@ selectionStatement :	IF LPAREN assignmentExpression RPAREN LBRACE {
 							switchStackTop++;
 							strcpy(switchStack[switchStackTop].temp_var, $$->temp_var);
 							strcpy(switchStack[switchStackTop].out_label, $$->info.flowControlInfo.next_label);
-						} labeledStatement RBRACE {
+						} labeledStmt RBRACE {
 							$$ = $6;
 							switchStackTop--;
 							printf("\n\n%s:", $$->info.flowControlInfo.next_label);
 						};
 
-labeledStatement :	CASE conditionalExpression {
+labeledStmt :	CASE conditional {
+						create_scope();
 						$$ = malloc(sizeof(struct ASTNode));
 						if($$ == NULL){
 							printf("Out of memory\n");
@@ -508,25 +657,27 @@ labeledStatement :	CASE conditionalExpression {
 						genLabel();
 						strcpy($$->info.flowControlInfo.false_label, label_g);
 						printf("\nifFalse %s = %s goto %s", switchStack[switchStackTop].temp_var, $2->temp_var, label_g);
-					} COLON slist breakStatement  {
+					} COLON slist breakStmt  {
+						remove_scope();
 						printf("\n\n%s:", $3->info.flowControlInfo.false_label);
-					} labeledStatement {$$ = $3;}
-					| DEFAULT COLON slist breakStatement {
+					} labeledStmt {$$ = $3;}
+					| DEFAULT COLON {create_scope();} slist {remove_scope();} breakStmt {
 						$$ = NULL;
 					}
 					| {$$=NULL;printf("\ngoto %s", switchStack[switchStackTop].out_label); };
 
-breakStatement : BREAK SEMICOLON {
+breakStmt : BREAK SEMICOLON {
 					printf("\ngoto %s", switchStack[switchStackTop].out_label);
 				}
 				| {};
 
 
-elseSelection : ELSE LBRACE slist RBRACE {
-					$$ = $3;
+elseStmt : ELSE LBRACE {create_scope();} slist RBRACE {
+					remove_scope();
+					$$ = $4;
 				} | { $$ = NULL;};
 
-iterationStatement :	WHILE {
+iterationStmt :	WHILE {
 							$$ = malloc(sizeof(struct ASTNode));
 							if($$ == NULL){
 								printf("Out of memory\n");
@@ -540,13 +691,15 @@ iterationStatement :	WHILE {
 							genLabel();
 							strcpy($$->info.flowControlInfo.false_label, label_g);
 							printf("\n\n%s:", $$->info.flowControlInfo.condition_label);
-						} LPAREN assignmentExpression {
+						} LPAREN assignment {
 							$$ = $2;
 							$$->info.flowControlInfo.condition = $4;
 							printf("\nif %s goto %s", $$->info.flowControlInfo.condition->temp_var, $$->info.flowControlInfo.true_label);
 							printf("\ngoto %s", $$->info.flowControlInfo.false_label);
 							printf("\n\n%s:", $$->info.flowControlInfo.true_label);
+							create_scope();
 						} RPAREN LBRACE slist RBRACE {
+							remove_scope();
 							$$ = $5;
 							$$->info.flowControlInfo.trueBranch = $8;
 							printf("\ngoto %s", $$->info.flowControlInfo.condition_label);

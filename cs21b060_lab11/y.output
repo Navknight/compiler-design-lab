@@ -1,0 +1,2141 @@
+   0  $accept : program $end
+
+   1  $$1 :
+
+   2  program : $$1 slist
+
+   3  slist : assignment SEMICOLON slist
+   4        | varDeclare SEMICOLON slist
+   5        | selectionStmt slist
+   6        | iterationStmt slist
+
+   7  $$2 :
+
+   8  slist : error $$2 slist
+   9        |
+
+  10  varDeclare : typeSpec idList
+
+  11  idList : IDENTIFIER
+  12         | idList COMMA IDENTIFIER
+  13         | idList COMMA IDENTIFIER arrayDeclarator
+
+  14  arrayDeclarator : arrayDeclarator LBRACKET INTEGER RBRACKET
+  15                  | LBRACKET INTEGER RBRACKET
+
+  16  typeSpec : INT_TYPE
+  17           | FLOAT_TYPE
+  18           | CHAR_TYPE
+
+  19  expression : assignment
+  20             | expression COMMA assignment
+
+  21  assignment : conditional
+  22             | unary ASSIGN assignment
+
+  23  conditional : logicalOr
+
+  24  logicalOr : logicalAnd
+  25            | logicalOr OR logicalAnd
+
+  26  logicalAnd : equality
+  27             | logicalAnd AND equality
+
+  28  equality : relop
+  29           | equality EQ relop
+  30           | equality NEQ relop
+
+  31  relop : additive
+  32        | relop LT additive
+  33        | relop GT additive
+  34        | relop LEQ additive
+  35        | relop GEQ additive
+
+  36  additive : multiplicative
+  37           | additive ADD multiplicative
+  38           | additive SUB multiplicative
+
+  39  multiplicative : unary
+  40                 | multiplicative MUL unary
+  41                 | multiplicative DIV unary
+
+  42  unary : postfix
+  43        | INC unary
+  44        | DEC unary
+  45        | ADD unary
+  46        | SUB unary
+  47        | NOT unary
+
+  48  postfix : primary
+  49          | postfix INC
+  50          | postfix DEC
+
+  51  primary : INTEGER
+  52          | IDENTIFIER
+  53          | LPAREN expression RPAREN
+
+  54  $$3 :
+
+  55  $$4 :
+
+  56  selectionStmt : IF LPAREN assignment RPAREN LBRACE $$3 slist $$4 RBRACE elseStmt
+
+  57  $$5 :
+
+  58  selectionStmt : SWITCH LPAREN expression RPAREN LBRACE $$5 labeledStmt RBRACE
+
+  59  $$6 :
+
+  60  $$7 :
+
+  61  labeledStmt : CASE conditional $$6 COLON slist breakStmt $$7 labeledStmt
+
+  62  $$8 :
+
+  63  $$9 :
+
+  64  labeledStmt : DEFAULT COLON $$8 slist $$9 breakStmt
+  65              |
+
+  66  breakStmt : BREAK SEMICOLON
+  67            |
+
+  68  $$10 :
+
+  69  elseStmt : ELSE LBRACE $$10 slist RBRACE
+  70           |
+
+  71  $$11 :
+
+  72  $$12 :
+
+  73  iterationStmt : WHILE $$11 LPAREN assignment $$12 RPAREN LBRACE slist RBRACE
+
+state 0
+	$accept : . program $end  (0)
+	$$1 : .  (1)
+
+	.  reduce 1
+
+	program  goto 1
+	$$1  goto 2
+
+
+state 1
+	$accept : program . $end  (0)
+
+	$end  accept
+
+
+state 2
+	program : $$1 . slist  (2)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	$end  reduce 9
+
+	slist  goto 18
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 3
+	slist : error . $$2 slist  (8)
+	$$2 : .  (7)
+
+	.  reduce 7
+
+	$$2  goto 34
+
+
+state 4
+	unary : ADD . unary  (45)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	unary  goto 35
+	postfix  goto 29
+	primary  goto 30
+
+
+state 5
+	unary : SUB . unary  (46)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	unary  goto 36
+	postfix  goto 29
+	primary  goto 30
+
+
+state 6
+	unary : INC . unary  (43)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	unary  goto 37
+	postfix  goto 29
+	primary  goto 30
+
+
+state 7
+	unary : DEC . unary  (44)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	unary  goto 38
+	postfix  goto 29
+	primary  goto 30
+
+
+state 8
+	primary : LPAREN . expression RPAREN  (53)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	expression  goto 39
+	assignment  goto 40
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+
+
+state 9
+	selectionStmt : IF . LPAREN assignment RPAREN LBRACE $$3 slist $$4 RBRACE elseStmt  (56)
+
+	LPAREN  shift 41
+	.  error
+
+
+state 10
+	iterationStmt : WHILE . $$11 LPAREN assignment $$12 RPAREN LBRACE slist RBRACE  (73)
+	$$11 : .  (71)
+
+	.  reduce 71
+
+	$$11  goto 42
+
+
+state 11
+	selectionStmt : SWITCH . LPAREN expression RPAREN LBRACE $$5 labeledStmt RBRACE  (58)
+
+	LPAREN  shift 43
+	.  error
+
+
+state 12
+	typeSpec : INT_TYPE .  (16)
+
+	.  reduce 16
+
+
+state 13
+	typeSpec : FLOAT_TYPE .  (17)
+
+	.  reduce 17
+
+
+state 14
+	typeSpec : CHAR_TYPE .  (18)
+
+	.  reduce 18
+
+
+state 15
+	unary : NOT . unary  (47)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	unary  goto 44
+	postfix  goto 29
+	primary  goto 30
+
+
+state 16
+	primary : INTEGER .  (51)
+
+	.  reduce 51
+
+
+state 17
+	primary : IDENTIFIER .  (52)
+
+	.  reduce 52
+
+
+state 18
+	program : $$1 slist .  (2)
+
+	.  reduce 2
+
+
+state 19
+	varDeclare : typeSpec . idList  (10)
+
+	IDENTIFIER  shift 45
+	.  error
+
+	idList  goto 46
+
+
+state 20
+	slist : assignment . SEMICOLON slist  (3)
+
+	SEMICOLON  shift 47
+	.  error
+
+
+state 21
+	assignment : conditional .  (21)
+
+	.  reduce 21
+
+
+state 22
+	conditional : logicalOr .  (23)
+	logicalOr : logicalOr . OR logicalAnd  (25)
+
+	OR  shift 48
+	RPAREN  reduce 23
+	SEMICOLON  reduce 23
+	COLON  reduce 23
+	COMMA  reduce 23
+
+
+state 23
+	logicalOr : logicalAnd .  (24)
+	logicalAnd : logicalAnd . AND equality  (27)
+
+	AND  shift 49
+	RPAREN  reduce 24
+	SEMICOLON  reduce 24
+	COLON  reduce 24
+	COMMA  reduce 24
+	OR  reduce 24
+
+
+state 24
+	logicalAnd : equality .  (26)
+	equality : equality . EQ relop  (29)
+	equality : equality . NEQ relop  (30)
+
+	EQ  shift 50
+	NEQ  shift 51
+	RPAREN  reduce 26
+	SEMICOLON  reduce 26
+	COLON  reduce 26
+	COMMA  reduce 26
+	AND  reduce 26
+	OR  reduce 26
+
+
+state 25
+	equality : relop .  (28)
+	relop : relop . LT additive  (32)
+	relop : relop . GT additive  (33)
+	relop : relop . LEQ additive  (34)
+	relop : relop . GEQ additive  (35)
+
+	LT  shift 52
+	GT  shift 53
+	LEQ  shift 54
+	GEQ  shift 55
+	RPAREN  reduce 28
+	SEMICOLON  reduce 28
+	COLON  reduce 28
+	COMMA  reduce 28
+	EQ  reduce 28
+	NEQ  reduce 28
+	AND  reduce 28
+	OR  reduce 28
+
+
+state 26
+	relop : additive .  (31)
+	additive : additive . ADD multiplicative  (37)
+	additive : additive . SUB multiplicative  (38)
+
+	ADD  shift 56
+	SUB  shift 57
+	RPAREN  reduce 31
+	SEMICOLON  reduce 31
+	COLON  reduce 31
+	COMMA  reduce 31
+	LT  reduce 31
+	GT  reduce 31
+	LEQ  reduce 31
+	GEQ  reduce 31
+	EQ  reduce 31
+	NEQ  reduce 31
+	AND  reduce 31
+	OR  reduce 31
+
+
+state 27
+	additive : multiplicative .  (36)
+	multiplicative : multiplicative . MUL unary  (40)
+	multiplicative : multiplicative . DIV unary  (41)
+
+	MUL  shift 58
+	DIV  shift 59
+	ADD  reduce 36
+	SUB  reduce 36
+	RPAREN  reduce 36
+	SEMICOLON  reduce 36
+	COLON  reduce 36
+	COMMA  reduce 36
+	LT  reduce 36
+	GT  reduce 36
+	LEQ  reduce 36
+	GEQ  reduce 36
+	EQ  reduce 36
+	NEQ  reduce 36
+	AND  reduce 36
+	OR  reduce 36
+
+
+state 28
+	assignment : unary . ASSIGN assignment  (22)
+	multiplicative : unary .  (39)
+
+	ASSIGN  shift 60
+	ADD  reduce 39
+	SUB  reduce 39
+	MUL  reduce 39
+	DIV  reduce 39
+	RPAREN  reduce 39
+	SEMICOLON  reduce 39
+	COMMA  reduce 39
+	LT  reduce 39
+	GT  reduce 39
+	LEQ  reduce 39
+	GEQ  reduce 39
+	EQ  reduce 39
+	NEQ  reduce 39
+	AND  reduce 39
+	OR  reduce 39
+
+
+state 29
+	unary : postfix .  (42)
+	postfix : postfix . INC  (49)
+	postfix : postfix . DEC  (50)
+
+	INC  shift 61
+	DEC  shift 62
+	ADD  reduce 42
+	SUB  reduce 42
+	MUL  reduce 42
+	DIV  reduce 42
+	ASSIGN  reduce 42
+	RPAREN  reduce 42
+	SEMICOLON  reduce 42
+	COLON  reduce 42
+	COMMA  reduce 42
+	LT  reduce 42
+	GT  reduce 42
+	LEQ  reduce 42
+	GEQ  reduce 42
+	EQ  reduce 42
+	NEQ  reduce 42
+	AND  reduce 42
+	OR  reduce 42
+
+
+state 30
+	postfix : primary .  (48)
+
+	.  reduce 48
+
+
+state 31
+	slist : selectionStmt . slist  (5)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	$end  reduce 9
+	RBRACE  reduce 9
+	CASE  reduce 9
+	BREAK  reduce 9
+	DEFAULT  reduce 9
+
+	slist  goto 63
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 32
+	slist : iterationStmt . slist  (6)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	$end  reduce 9
+	RBRACE  reduce 9
+	CASE  reduce 9
+	BREAK  reduce 9
+	DEFAULT  reduce 9
+
+	slist  goto 64
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 33
+	slist : varDeclare . SEMICOLON slist  (4)
+
+	SEMICOLON  shift 65
+	.  error
+
+
+state 34
+	slist : error $$2 . slist  (8)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	$end  reduce 9
+	RBRACE  reduce 9
+	CASE  reduce 9
+	BREAK  reduce 9
+	DEFAULT  reduce 9
+
+	slist  goto 66
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 35
+	unary : ADD unary .  (45)
+
+	.  reduce 45
+
+
+state 36
+	unary : SUB unary .  (46)
+
+	.  reduce 46
+
+
+state 37
+	unary : INC unary .  (43)
+
+	.  reduce 43
+
+
+state 38
+	unary : DEC unary .  (44)
+
+	.  reduce 44
+
+
+state 39
+	expression : expression . COMMA assignment  (20)
+	primary : LPAREN expression . RPAREN  (53)
+
+	RPAREN  shift 67
+	COMMA  shift 68
+	.  error
+
+
+state 40
+	expression : assignment .  (19)
+
+	.  reduce 19
+
+
+state 41
+	selectionStmt : IF LPAREN . assignment RPAREN LBRACE $$3 slist $$4 RBRACE elseStmt  (56)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	assignment  goto 69
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+
+
+state 42
+	iterationStmt : WHILE $$11 . LPAREN assignment $$12 RPAREN LBRACE slist RBRACE  (73)
+
+	LPAREN  shift 70
+	.  error
+
+
+state 43
+	selectionStmt : SWITCH LPAREN . expression RPAREN LBRACE $$5 labeledStmt RBRACE  (58)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	expression  goto 71
+	assignment  goto 40
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+
+
+state 44
+	unary : NOT unary .  (47)
+
+	.  reduce 47
+
+
+state 45
+	idList : IDENTIFIER .  (11)
+
+	.  reduce 11
+
+
+state 46
+	varDeclare : typeSpec idList .  (10)
+	idList : idList . COMMA IDENTIFIER  (12)
+	idList : idList . COMMA IDENTIFIER arrayDeclarator  (13)
+
+	COMMA  shift 72
+	SEMICOLON  reduce 10
+
+
+state 47
+	slist : assignment SEMICOLON . slist  (3)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	$end  reduce 9
+	RBRACE  reduce 9
+	CASE  reduce 9
+	BREAK  reduce 9
+	DEFAULT  reduce 9
+
+	slist  goto 73
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 48
+	logicalOr : logicalOr OR . logicalAnd  (25)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	logicalAnd  goto 74
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 49
+	logicalAnd : logicalAnd AND . equality  (27)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	equality  goto 76
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 50
+	equality : equality EQ . relop  (29)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	relop  goto 77
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 51
+	equality : equality NEQ . relop  (30)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	relop  goto 78
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 52
+	relop : relop LT . additive  (32)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	additive  goto 79
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 53
+	relop : relop GT . additive  (33)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	additive  goto 80
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 54
+	relop : relop LEQ . additive  (34)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	additive  goto 81
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 55
+	relop : relop GEQ . additive  (35)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	additive  goto 82
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 56
+	additive : additive ADD . multiplicative  (37)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	multiplicative  goto 83
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 57
+	additive : additive SUB . multiplicative  (38)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	multiplicative  goto 84
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 58
+	multiplicative : multiplicative MUL . unary  (40)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	unary  goto 85
+	postfix  goto 29
+	primary  goto 30
+
+
+state 59
+	multiplicative : multiplicative DIV . unary  (41)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	unary  goto 86
+	postfix  goto 29
+	primary  goto 30
+
+
+state 60
+	assignment : unary ASSIGN . assignment  (22)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	assignment  goto 87
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+
+
+state 61
+	postfix : postfix INC .  (49)
+
+	.  reduce 49
+
+
+state 62
+	postfix : postfix DEC .  (50)
+
+	.  reduce 50
+
+
+state 63
+	slist : selectionStmt slist .  (5)
+
+	.  reduce 5
+
+
+state 64
+	slist : iterationStmt slist .  (6)
+
+	.  reduce 6
+
+
+state 65
+	slist : varDeclare SEMICOLON . slist  (4)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	$end  reduce 9
+	RBRACE  reduce 9
+	CASE  reduce 9
+	BREAK  reduce 9
+	DEFAULT  reduce 9
+
+	slist  goto 88
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 66
+	slist : error $$2 slist .  (8)
+
+	.  reduce 8
+
+
+state 67
+	primary : LPAREN expression RPAREN .  (53)
+
+	.  reduce 53
+
+
+state 68
+	expression : expression COMMA . assignment  (20)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	assignment  goto 89
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+
+
+state 69
+	selectionStmt : IF LPAREN assignment . RPAREN LBRACE $$3 slist $$4 RBRACE elseStmt  (56)
+
+	RPAREN  shift 90
+	.  error
+
+
+state 70
+	iterationStmt : WHILE $$11 LPAREN . assignment $$12 RPAREN LBRACE slist RBRACE  (73)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	assignment  goto 91
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+
+
+state 71
+	expression : expression . COMMA assignment  (20)
+	selectionStmt : SWITCH LPAREN expression . RPAREN LBRACE $$5 labeledStmt RBRACE  (58)
+
+	RPAREN  shift 92
+	COMMA  shift 68
+	.  error
+
+
+state 72
+	idList : idList COMMA . IDENTIFIER  (12)
+	idList : idList COMMA . IDENTIFIER arrayDeclarator  (13)
+
+	IDENTIFIER  shift 93
+	.  error
+
+
+state 73
+	slist : assignment SEMICOLON slist .  (3)
+
+	.  reduce 3
+
+
+state 74
+	logicalOr : logicalOr OR logicalAnd .  (25)
+	logicalAnd : logicalAnd . AND equality  (27)
+
+	AND  shift 49
+	RPAREN  reduce 25
+	SEMICOLON  reduce 25
+	COLON  reduce 25
+	COMMA  reduce 25
+	OR  reduce 25
+
+
+state 75
+	multiplicative : unary .  (39)
+
+	.  reduce 39
+
+
+state 76
+	logicalAnd : logicalAnd AND equality .  (27)
+	equality : equality . EQ relop  (29)
+	equality : equality . NEQ relop  (30)
+
+	EQ  shift 50
+	NEQ  shift 51
+	RPAREN  reduce 27
+	SEMICOLON  reduce 27
+	COLON  reduce 27
+	COMMA  reduce 27
+	AND  reduce 27
+	OR  reduce 27
+
+
+state 77
+	equality : equality EQ relop .  (29)
+	relop : relop . LT additive  (32)
+	relop : relop . GT additive  (33)
+	relop : relop . LEQ additive  (34)
+	relop : relop . GEQ additive  (35)
+
+	LT  shift 52
+	GT  shift 53
+	LEQ  shift 54
+	GEQ  shift 55
+	RPAREN  reduce 29
+	SEMICOLON  reduce 29
+	COLON  reduce 29
+	COMMA  reduce 29
+	EQ  reduce 29
+	NEQ  reduce 29
+	AND  reduce 29
+	OR  reduce 29
+
+
+state 78
+	equality : equality NEQ relop .  (30)
+	relop : relop . LT additive  (32)
+	relop : relop . GT additive  (33)
+	relop : relop . LEQ additive  (34)
+	relop : relop . GEQ additive  (35)
+
+	LT  shift 52
+	GT  shift 53
+	LEQ  shift 54
+	GEQ  shift 55
+	RPAREN  reduce 30
+	SEMICOLON  reduce 30
+	COLON  reduce 30
+	COMMA  reduce 30
+	EQ  reduce 30
+	NEQ  reduce 30
+	AND  reduce 30
+	OR  reduce 30
+
+
+state 79
+	relop : relop LT additive .  (32)
+	additive : additive . ADD multiplicative  (37)
+	additive : additive . SUB multiplicative  (38)
+
+	ADD  shift 56
+	SUB  shift 57
+	RPAREN  reduce 32
+	SEMICOLON  reduce 32
+	COLON  reduce 32
+	COMMA  reduce 32
+	LT  reduce 32
+	GT  reduce 32
+	LEQ  reduce 32
+	GEQ  reduce 32
+	EQ  reduce 32
+	NEQ  reduce 32
+	AND  reduce 32
+	OR  reduce 32
+
+
+state 80
+	relop : relop GT additive .  (33)
+	additive : additive . ADD multiplicative  (37)
+	additive : additive . SUB multiplicative  (38)
+
+	ADD  shift 56
+	SUB  shift 57
+	RPAREN  reduce 33
+	SEMICOLON  reduce 33
+	COLON  reduce 33
+	COMMA  reduce 33
+	LT  reduce 33
+	GT  reduce 33
+	LEQ  reduce 33
+	GEQ  reduce 33
+	EQ  reduce 33
+	NEQ  reduce 33
+	AND  reduce 33
+	OR  reduce 33
+
+
+state 81
+	relop : relop LEQ additive .  (34)
+	additive : additive . ADD multiplicative  (37)
+	additive : additive . SUB multiplicative  (38)
+
+	ADD  shift 56
+	SUB  shift 57
+	RPAREN  reduce 34
+	SEMICOLON  reduce 34
+	COLON  reduce 34
+	COMMA  reduce 34
+	LT  reduce 34
+	GT  reduce 34
+	LEQ  reduce 34
+	GEQ  reduce 34
+	EQ  reduce 34
+	NEQ  reduce 34
+	AND  reduce 34
+	OR  reduce 34
+
+
+state 82
+	relop : relop GEQ additive .  (35)
+	additive : additive . ADD multiplicative  (37)
+	additive : additive . SUB multiplicative  (38)
+
+	ADD  shift 56
+	SUB  shift 57
+	RPAREN  reduce 35
+	SEMICOLON  reduce 35
+	COLON  reduce 35
+	COMMA  reduce 35
+	LT  reduce 35
+	GT  reduce 35
+	LEQ  reduce 35
+	GEQ  reduce 35
+	EQ  reduce 35
+	NEQ  reduce 35
+	AND  reduce 35
+	OR  reduce 35
+
+
+state 83
+	additive : additive ADD multiplicative .  (37)
+	multiplicative : multiplicative . MUL unary  (40)
+	multiplicative : multiplicative . DIV unary  (41)
+
+	MUL  shift 58
+	DIV  shift 59
+	ADD  reduce 37
+	SUB  reduce 37
+	RPAREN  reduce 37
+	SEMICOLON  reduce 37
+	COLON  reduce 37
+	COMMA  reduce 37
+	LT  reduce 37
+	GT  reduce 37
+	LEQ  reduce 37
+	GEQ  reduce 37
+	EQ  reduce 37
+	NEQ  reduce 37
+	AND  reduce 37
+	OR  reduce 37
+
+
+state 84
+	additive : additive SUB multiplicative .  (38)
+	multiplicative : multiplicative . MUL unary  (40)
+	multiplicative : multiplicative . DIV unary  (41)
+
+	MUL  shift 58
+	DIV  shift 59
+	ADD  reduce 38
+	SUB  reduce 38
+	RPAREN  reduce 38
+	SEMICOLON  reduce 38
+	COLON  reduce 38
+	COMMA  reduce 38
+	LT  reduce 38
+	GT  reduce 38
+	LEQ  reduce 38
+	GEQ  reduce 38
+	EQ  reduce 38
+	NEQ  reduce 38
+	AND  reduce 38
+	OR  reduce 38
+
+
+state 85
+	multiplicative : multiplicative MUL unary .  (40)
+
+	.  reduce 40
+
+
+state 86
+	multiplicative : multiplicative DIV unary .  (41)
+
+	.  reduce 41
+
+
+state 87
+	assignment : unary ASSIGN assignment .  (22)
+
+	.  reduce 22
+
+
+state 88
+	slist : varDeclare SEMICOLON slist .  (4)
+
+	.  reduce 4
+
+
+state 89
+	expression : expression COMMA assignment .  (20)
+
+	.  reduce 20
+
+
+state 90
+	selectionStmt : IF LPAREN assignment RPAREN . LBRACE $$3 slist $$4 RBRACE elseStmt  (56)
+
+	LBRACE  shift 94
+	.  error
+
+
+state 91
+	iterationStmt : WHILE $$11 LPAREN assignment . $$12 RPAREN LBRACE slist RBRACE  (73)
+	$$12 : .  (72)
+
+	.  reduce 72
+
+	$$12  goto 95
+
+
+state 92
+	selectionStmt : SWITCH LPAREN expression RPAREN . LBRACE $$5 labeledStmt RBRACE  (58)
+
+	LBRACE  shift 96
+	.  error
+
+
+state 93
+	idList : idList COMMA IDENTIFIER .  (12)
+	idList : idList COMMA IDENTIFIER . arrayDeclarator  (13)
+
+	LBRACKET  shift 97
+	SEMICOLON  reduce 12
+	COMMA  reduce 12
+
+	arrayDeclarator  goto 98
+
+
+state 94
+	selectionStmt : IF LPAREN assignment RPAREN LBRACE . $$3 slist $$4 RBRACE elseStmt  (56)
+	$$3 : .  (54)
+
+	.  reduce 54
+
+	$$3  goto 99
+
+
+state 95
+	iterationStmt : WHILE $$11 LPAREN assignment $$12 . RPAREN LBRACE slist RBRACE  (73)
+
+	RPAREN  shift 100
+	.  error
+
+
+state 96
+	selectionStmt : SWITCH LPAREN expression RPAREN LBRACE . $$5 labeledStmt RBRACE  (58)
+	$$5 : .  (57)
+
+	.  reduce 57
+
+	$$5  goto 101
+
+
+state 97
+	arrayDeclarator : LBRACKET . INTEGER RBRACKET  (15)
+
+	INTEGER  shift 102
+	.  error
+
+
+state 98
+	idList : idList COMMA IDENTIFIER arrayDeclarator .  (13)
+	arrayDeclarator : arrayDeclarator . LBRACKET INTEGER RBRACKET  (14)
+
+	LBRACKET  shift 103
+	SEMICOLON  reduce 13
+	COMMA  reduce 13
+
+
+state 99
+	selectionStmt : IF LPAREN assignment RPAREN LBRACE $$3 . slist $$4 RBRACE elseStmt  (56)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	RBRACE  reduce 9
+
+	slist  goto 104
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 100
+	iterationStmt : WHILE $$11 LPAREN assignment $$12 RPAREN . LBRACE slist RBRACE  (73)
+
+	LBRACE  shift 105
+	.  error
+
+
+state 101
+	selectionStmt : SWITCH LPAREN expression RPAREN LBRACE $$5 . labeledStmt RBRACE  (58)
+	labeledStmt : .  (65)
+
+	CASE  shift 106
+	DEFAULT  shift 107
+	RBRACE  reduce 65
+
+	labeledStmt  goto 108
+
+
+state 102
+	arrayDeclarator : LBRACKET INTEGER . RBRACKET  (15)
+
+	RBRACKET  shift 109
+	.  error
+
+
+state 103
+	arrayDeclarator : arrayDeclarator LBRACKET . INTEGER RBRACKET  (14)
+
+	INTEGER  shift 110
+	.  error
+
+
+state 104
+	selectionStmt : IF LPAREN assignment RPAREN LBRACE $$3 slist . $$4 RBRACE elseStmt  (56)
+	$$4 : .  (55)
+
+	.  reduce 55
+
+	$$4  goto 111
+
+
+state 105
+	iterationStmt : WHILE $$11 LPAREN assignment $$12 RPAREN LBRACE . slist RBRACE  (73)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	RBRACE  reduce 9
+
+	slist  goto 112
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 106
+	labeledStmt : CASE . conditional $$6 COLON slist breakStmt $$7 labeledStmt  (61)
+
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	.  error
+
+	conditional  goto 113
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 75
+	postfix  goto 29
+	primary  goto 30
+
+
+state 107
+	labeledStmt : DEFAULT . COLON $$8 slist $$9 breakStmt  (64)
+
+	COLON  shift 114
+	.  error
+
+
+state 108
+	selectionStmt : SWITCH LPAREN expression RPAREN LBRACE $$5 labeledStmt . RBRACE  (58)
+
+	RBRACE  shift 115
+	.  error
+
+
+state 109
+	arrayDeclarator : LBRACKET INTEGER RBRACKET .  (15)
+
+	.  reduce 15
+
+
+state 110
+	arrayDeclarator : arrayDeclarator LBRACKET INTEGER . RBRACKET  (14)
+
+	RBRACKET  shift 116
+	.  error
+
+
+state 111
+	selectionStmt : IF LPAREN assignment RPAREN LBRACE $$3 slist $$4 . RBRACE elseStmt  (56)
+
+	RBRACE  shift 117
+	.  error
+
+
+state 112
+	iterationStmt : WHILE $$11 LPAREN assignment $$12 RPAREN LBRACE slist . RBRACE  (73)
+
+	RBRACE  shift 118
+	.  error
+
+
+state 113
+	labeledStmt : CASE conditional . $$6 COLON slist breakStmt $$7 labeledStmt  (61)
+	$$6 : .  (59)
+
+	.  reduce 59
+
+	$$6  goto 119
+
+
+state 114
+	labeledStmt : DEFAULT COLON . $$8 slist $$9 breakStmt  (64)
+	$$8 : .  (62)
+
+	.  reduce 62
+
+	$$8  goto 120
+
+
+state 115
+	selectionStmt : SWITCH LPAREN expression RPAREN LBRACE $$5 labeledStmt RBRACE .  (58)
+
+	.  reduce 58
+
+
+state 116
+	arrayDeclarator : arrayDeclarator LBRACKET INTEGER RBRACKET .  (14)
+
+	.  reduce 14
+
+
+state 117
+	selectionStmt : IF LPAREN assignment RPAREN LBRACE $$3 slist $$4 RBRACE . elseStmt  (56)
+	elseStmt : .  (70)
+
+	ELSE  shift 121
+	$end  reduce 70
+	error  reduce 70
+	ADD  reduce 70
+	SUB  reduce 70
+	INC  reduce 70
+	DEC  reduce 70
+	LPAREN  reduce 70
+	RBRACE  reduce 70
+	IF  reduce 70
+	WHILE  reduce 70
+	SWITCH  reduce 70
+	CASE  reduce 70
+	BREAK  reduce 70
+	DEFAULT  reduce 70
+	INT_TYPE  reduce 70
+	FLOAT_TYPE  reduce 70
+	CHAR_TYPE  reduce 70
+	NOT  reduce 70
+	INTEGER  reduce 70
+	IDENTIFIER  reduce 70
+
+	elseStmt  goto 122
+
+
+state 118
+	iterationStmt : WHILE $$11 LPAREN assignment $$12 RPAREN LBRACE slist RBRACE .  (73)
+
+	.  reduce 73
+
+
+state 119
+	labeledStmt : CASE conditional $$6 . COLON slist breakStmt $$7 labeledStmt  (61)
+
+	COLON  shift 123
+	.  error
+
+
+state 120
+	labeledStmt : DEFAULT COLON $$8 . slist $$9 breakStmt  (64)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	RBRACE  reduce 9
+	BREAK  reduce 9
+
+	slist  goto 124
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 121
+	elseStmt : ELSE . LBRACE $$10 slist RBRACE  (69)
+
+	LBRACE  shift 125
+	.  error
+
+
+state 122
+	selectionStmt : IF LPAREN assignment RPAREN LBRACE $$3 slist $$4 RBRACE elseStmt .  (56)
+
+	.  reduce 56
+
+
+state 123
+	labeledStmt : CASE conditional $$6 COLON . slist breakStmt $$7 labeledStmt  (61)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	RBRACE  reduce 9
+	CASE  reduce 9
+	BREAK  reduce 9
+	DEFAULT  reduce 9
+
+	slist  goto 126
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 124
+	labeledStmt : DEFAULT COLON $$8 slist . $$9 breakStmt  (64)
+	$$9 : .  (63)
+
+	.  reduce 63
+
+	$$9  goto 127
+
+
+state 125
+	elseStmt : ELSE LBRACE . $$10 slist RBRACE  (69)
+	$$10 : .  (68)
+
+	.  reduce 68
+
+	$$10  goto 128
+
+
+state 126
+	labeledStmt : CASE conditional $$6 COLON slist . breakStmt $$7 labeledStmt  (61)
+	breakStmt : .  (67)
+
+	BREAK  shift 129
+	RBRACE  reduce 67
+	CASE  reduce 67
+	DEFAULT  reduce 67
+
+	breakStmt  goto 130
+
+
+state 127
+	labeledStmt : DEFAULT COLON $$8 slist $$9 . breakStmt  (64)
+	breakStmt : .  (67)
+
+	BREAK  shift 129
+	RBRACE  reduce 67
+
+	breakStmt  goto 131
+
+
+state 128
+	elseStmt : ELSE LBRACE $$10 . slist RBRACE  (69)
+	slist : .  (9)
+
+	error  shift 3
+	ADD  shift 4
+	SUB  shift 5
+	INC  shift 6
+	DEC  shift 7
+	LPAREN  shift 8
+	IF  shift 9
+	WHILE  shift 10
+	SWITCH  shift 11
+	INT_TYPE  shift 12
+	FLOAT_TYPE  shift 13
+	CHAR_TYPE  shift 14
+	NOT  shift 15
+	INTEGER  shift 16
+	IDENTIFIER  shift 17
+	RBRACE  reduce 9
+
+	slist  goto 132
+	typeSpec  goto 19
+	assignment  goto 20
+	conditional  goto 21
+	logicalOr  goto 22
+	logicalAnd  goto 23
+	equality  goto 24
+	relop  goto 25
+	additive  goto 26
+	multiplicative  goto 27
+	unary  goto 28
+	postfix  goto 29
+	primary  goto 30
+	selectionStmt  goto 31
+	iterationStmt  goto 32
+	varDeclare  goto 33
+
+
+state 129
+	breakStmt : BREAK . SEMICOLON  (66)
+
+	SEMICOLON  shift 133
+	.  error
+
+
+state 130
+	labeledStmt : CASE conditional $$6 COLON slist breakStmt . $$7 labeledStmt  (61)
+	$$7 : .  (60)
+
+	.  reduce 60
+
+	$$7  goto 134
+
+
+state 131
+	labeledStmt : DEFAULT COLON $$8 slist $$9 breakStmt .  (64)
+
+	.  reduce 64
+
+
+state 132
+	elseStmt : ELSE LBRACE $$10 slist . RBRACE  (69)
+
+	RBRACE  shift 135
+	.  error
+
+
+state 133
+	breakStmt : BREAK SEMICOLON .  (66)
+
+	.  reduce 66
+
+
+state 134
+	labeledStmt : CASE conditional $$6 COLON slist breakStmt $$7 . labeledStmt  (61)
+	labeledStmt : .  (65)
+
+	CASE  shift 106
+	DEFAULT  shift 107
+	RBRACE  reduce 65
+
+	labeledStmt  goto 136
+
+
+state 135
+	elseStmt : ELSE LBRACE $$10 slist RBRACE .  (69)
+
+	.  reduce 69
+
+
+state 136
+	labeledStmt : CASE conditional $$6 COLON slist breakStmt $$7 labeledStmt .  (61)
+
+	.  reduce 61
+
+
+42 terminals, 36 nonterminals
+74 grammar rules, 137 states
+
+grammar parser grammar
+symbol# value# symbol
+     0      0  $end
+     1    256  error
+     2    257  ADD
+     3    258  SUB
+     4    259  MUL
+     5    260  DIV
+     6    261  INC
+     7    262  DEC
+     8    263  ASSIGN
+     9    264  LPAREN
+    10    265  RPAREN
+    11    266  LBRACE
+    12    267  RBRACE
+    13    268  LBRACKET
+    14    269  RBRACKET
+    15    270  SEMICOLON
+    16    271  COLON
+    17    272  COMMA
+    18    273  IF
+    19    274  ELSE
+    20    275  WHILE
+    21    276  SWITCH
+    22    277  CASE
+    23    278  BREAK
+    24    279  CONTINUE
+    25    280  RETURN
+    26    281  GOTO
+    27    282  DEFAULT
+    28    283  INT_TYPE
+    29    284  FLOAT_TYPE
+    30    285  CHAR_TYPE
+    31    286  LT
+    32    287  GT
+    33    288  LEQ
+    34    289  GEQ
+    35    290  EQ
+    36    291  NEQ
+    37    292  AND
+    38    293  OR
+    39    294  NOT
+    40    295  INTEGER
+    41    296  IDENTIFIER
+    42    297  $accept
+    43    298  program
+    44    299  slist
+    45    300  typeSpec
+    46    301  expression
+    47    302  assignment
+    48    303  conditional
+    49    304  logicalOr
+    50    305  logicalAnd
+    51    306  equality
+    52    307  relop
+    53    308  additive
+    54    309  multiplicative
+    55    310  unary
+    56    311  postfix
+    57    312  primary
+    58    313  selectionStmt
+    59    314  elseStmt
+    60    315  labeledStmt
+    61    316  iterationStmt
+    62    317  arrayDeclarator
+    63    318  $$1
+    64    319  varDeclare
+    65    320  $$2
+    66    321  idList
+    67    322  $$3
+    68    323  $$4
+    69    324  $$5
+    70    325  $$6
+    71    326  breakStmt
+    72    327  $$7
+    73    328  $$8
+    74    329  $$9
+    75    330  $$10
+    76    331  $$11
+    77    332  $$12
